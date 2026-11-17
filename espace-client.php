@@ -83,7 +83,7 @@ entete('Mon espace client', null);
 </nav>
 
 <?php if ($onglet === 'locations'):
-    $st = $pdo->prepare("SELECT l.*, r.immatriculation, r.date_debut, r.date_fin, v.marque, v.modele, v.code_categorie, v.couleur, f.libelle AS formule,
+    $st = $pdo->prepare("SELECT l.*, r.immatriculation, r.date_debut, r.date_fin, v.marque, v.modele, v.code_categorie, v.couleur, v.type, f.libelle AS formule,
                                 (SELECT COALESCE(SUM(montant), 0) FROM paiement pa WHERE pa.num_location = l.num_location) AS total_paye,
                                 (SELECT COUNT(*) FROM etat_des_lieux e WHERE e.num_location = l.num_location) AS nb_etats
                          FROM location l JOIN reservation r ON r.num_reservation = l.num_reservation JOIN vehicule v ON v.immatriculation = r.immatriculation
@@ -95,7 +95,7 @@ entete('Mon espace client', null);
   <?php endif; ?>
   <?php foreach ($locations as $l): [$photo] = photo_vehicule($l); ?>
     <article class="location-client">
-      <img src="<?= h($photo) ?>" alt="">
+      <?= voiture_3d($l) ?>
       <div>
         <h3><?= h($l['marque'] . ' ' . $l['modele']) ?> <?= plaque($l['immatriculation']) ?></h3>
         <p class="vehicule__meta"><span>Location n° <?= (int) $l['num_location'] ?></span><span>Formule <?= h($l['formule']) ?></span><span>Payé <?= euros((float) $l['total_paye']) ?></span></p>

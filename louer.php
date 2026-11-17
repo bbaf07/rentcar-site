@@ -157,7 +157,7 @@ entete('Louer un véhicule', 'UC-06', $etape, $ext);
   <h2>Récapitulatif</h2>
   <?php [$photo] = photo_vehicule($r); ?>
   <div class="recap">
-    <img src="<?= h($photo) ?>" alt="<?= h($r['marque'] . ' ' . $r['modele']) ?>">
+    <?= voiture_3d($r) ?>
     <dl>
       <dt>Réservation</dt><dd>n° <?= (int) $r['num_reservation'] ?> <?= badge($r['statut']) ?></dd>
       <dt>Client</dt><dd><?= h($r['prenom'] . ' ' . $r['nom']) ?>, permis <?= h($r['num_permis']) ?></dd>

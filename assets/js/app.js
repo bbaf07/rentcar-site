@@ -64,3 +64,25 @@
     scene.addEventListener('pointerup', () => { dep = null; });
   }
 })();
+
+// Voitures en 3D : couleur réelle du véhicule appliquée à la carrosserie une fois le modèle chargé.
+(() => {
+  const reduire = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const enHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+  const lineaire = c => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const preparer = mv => {
+    if (reduire) mv.removeAttribute('auto-rotate');
+    const peindre = () => {
+      const nom = mv.dataset.carrosserie, hex = mv.dataset.couleur;
+      if (!nom || !hex || !mv.model || mv.classList.contains('vue-3d--prete')) return;
+      const [r, g, b] = enHex(hex).map(lineaire);   // glTF attend des couleurs en espace linéaire
+      mv.model.materials.filter(m => m.name === nom).forEach(m => m.pbrMetallicRoughness.setBaseColorFactor([r, g, b, 1]));
+      mv.classList.add('vue-3d--prete');
+    };
+    mv.addEventListener('load', peindre);
+    if (mv.loaded) peindre();   // modèle déjà chargé (cache) avant l'écoute
+  };
+  // Attendre la définition du composant pour que mv.loaded et mv.model soient disponibles
+  const lancer = () => document.querySelectorAll('model-viewer[data-couleur]').forEach(preparer);
+  if (window.customElements) customElements.whenDefined('model-viewer').then(lancer); else lancer();
+})();

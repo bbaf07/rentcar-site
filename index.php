@@ -21,7 +21,7 @@ ob_start(); ?>
         <button class="btn" type="submit">Rechercher</button>
       </form>
     </div>
-    <div class="hero__photo"><img src="assets/voitures/peugeot-308.jpg" alt="Peugeot 308 bleue sur le parking de l'agence"></div>
+    <div class="hero__photo"><?php $vedette = null; foreach ($parc as $x) { if ($x['immatriculation'] === 'EF-456-GH') { $vedette = $x; } } echo voiture_3d($vedette ?? $parc[0], 'vue-3d vue-3d--hero', true); ?></div>
   </div>
 </section>
 <?php $hero = (string) ob_get_clean();

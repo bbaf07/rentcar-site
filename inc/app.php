@@ -5,6 +5,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/metier.php';
 require_once __DIR__ . '/amelioration.php';
 require_once __DIR__ . '/vues_etat.php';
+require_once __DIR__ . '/voiture3d.php';
 
 session_start([
     'cookie_httponly' => true,
@@ -112,6 +113,7 @@ function entete(string $titre, ?string $uc, int $etape = 0, array $ext = [], arr
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/app.css">
+<script type="module" src="assets/js/vendor/model-viewer.min.js"></script>
 <script>document.documentElement.classList.add('js');try{const t=localStorage.getItem('rentcar-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body class="<?= h($opts['classe'] ?? '') ?>">
@@ -170,7 +172,7 @@ function pied(): void
 <footer class="pied">
   <div class="wrap pied__in">
     <span>RentCar, agence de location de véhicules</span>
-    <span class="pied__liens"><a href="credits.php">Crédits photos</a></span>
+    <span class="pied__liens"><a href="credits.php">Crédits photos et 3D</a></span>
   </div>
 </footer>
 <script src="assets/js/app.js"></script>
@@ -266,7 +268,7 @@ function carte_vehicule(array $v, string $action = ''): string
     [$src, $cr] = photo_vehicule($v);
     ob_start(); ?>
     <article class="vehicule">
-      <div class="vehicule__photo"><img src="<?= h($src) ?>" alt="<?= h($v['marque'] . ' ' . $v['modele']) ?>" loading="lazy"><?= plaque($v['immatriculation']) ?></div>
+      <div class="vehicule__photo"><?= voiture_3d($v) ?><?= plaque($v['immatriculation']) ?></div>
       <div class="vehicule__corps">
         <h3><?= h($v['marque'] . ' ' . $v['modele']) ?></h3>
         <p class="vehicule__meta"><span>Catégorie <?= h($v['code_categorie'] . (!empty($v['categorie_libelle']) ? ', ' . $v['categorie_libelle'] : '')) ?></span><span><?= $v['type'] === 'UTILITAIRE' ? 'Utilitaire' : 'Touristique' ?></span><span><?= h((string) $v['couleur']) ?></span></p>

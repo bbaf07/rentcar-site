@@ -123,7 +123,7 @@ entete('Rendre un véhicule', 'UC-07', $etape, $ext);
 
 <?php else: [$photo] = photo_vehicule($loc); ?>
   <div class="recap">
-    <img src="<?= h($photo) ?>" alt="<?= h($loc['marque'] . ' ' . $loc['modele']) ?>">
+    <?= voiture_3d($loc) ?>
     <dl>
       <dt>Location</dt><dd>n° <?= (int) $loc['num_location'] ?>, <?= h($loc['prenom'] . ' ' . $loc['nom']) ?></dd>
       <dt>Véhicule</dt><dd><?= h($loc['marque'] . ' ' . $loc['modele']) ?> <?= plaque($loc['immatriculation']) ?></dd>

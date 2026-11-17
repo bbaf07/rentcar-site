@@ -68,7 +68,7 @@ entete('Réserver un véhicule', 'UC-05', $etape, $ext);
   <div class="flash flash--ok" role="status">Réservation n° <?= $creee ?> enregistrée<?= $estEmploye ? ' et confirmée.' : ' : elle est en attente de confirmation par l\'agence.' ?></div>
   <?php [$photo] = photo_vehicule($vehicule); ?>
   <div class="recap">
-    <img src="<?= h($photo) ?>" alt="">
+    <?= voiture_3d($vehicule) ?>
     <dl>
       <dt>Réservation</dt><dd>n° <?= $creee ?> <?= badge($estEmploye ? 'CONFIRMEE' : 'EN_ATTENTE') ?></dd>
       <dt>Véhicule</dt><dd><?= h($vehicule['marque'] . ' ' . $vehicule['modele']) ?> <?= plaque($vehicule['immatriculation']) ?></dd>
@@ -84,7 +84,7 @@ entete('Réserver un véhicule', 'UC-05', $etape, $ext);
   <h2>Vérifiez votre réservation</h2>
   <?php [$photo] = photo_vehicule($vehicule); ?>
   <div class="recap">
-    <img src="<?= h($photo) ?>" alt="<?= h($vehicule['marque'] . ' ' . $vehicule['modele']) ?>">
+    <?= voiture_3d($vehicule) ?>
     <dl>
       <?php if ($estEmploye): foreach ($clients as $c) { if ((int) $c['num_client'] === $choix['client']) { $nomClient = $c['prenom'] . ' ' . $c['nom']; } } ?>
         <dt>Client</dt><dd><?= h($nomClient ?? '') ?> (n° <?= $choix['client'] ?>)</dd>
