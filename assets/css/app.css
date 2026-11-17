@@ -307,3 +307,7 @@ input:focus, select:focus { border-color: var(--plaque); outline: none; box-shad
 @media (max-width: 760px) { .location-client { grid-template-columns: 1fr; } }
 .caution-etat { display: inline-flex; gap: 6px; align-items: center; font-size: .92rem; }
 .badge--BLOQUEE { color: var(--ambre); } .badge--LIBEREE { color: var(--ok); } .badge--RETENUE { color: var(--alerte); }
+
+.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .deux-colonnes { grid-template-columns: 1fr; } }
+.barre nav .pastille { margin-left: 4px; }

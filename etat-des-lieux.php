@@ -15,7 +15,7 @@ $retour = charger_etat($pdo, $numLoc, 'RETOUR');
 $estEmploye = $u['role'] === 'employe';
 $erreurs = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $estEmploye && !$depart) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $estEmploye && !$depart && !$l['date_retour_effective']) {
     verifier_jeton();
     $erreurs = verifier_etat($_POST, $_FILES, (int) $l['km_depart']);
     if (!$erreurs) {
@@ -30,11 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $estEmploye && !$depart) {
         rediriger('contrat.php?loc=' . $numLoc);
     }
 }
-entete('État des lieux, location n° ' . $numLoc, $estEmploye && !$depart ? 'UC-06' : null, $estEmploye && !$depart ? 10 : 0);
+$formulaire = $estEmploye && !$depart && !$l['date_retour_effective'];
+entete('État des lieux, location n° ' . $numLoc, $formulaire ? 'UC-06' : null, $formulaire ? 10 : 0);
 ?>
 <p class="gris"><?= h($l['marque'] . ' ' . $l['modele']) ?> <?= plaque($l['immatriculation']) ?></p>
 <?php if ($erreurs): ?><div class="flash flash--erreur" role="alert"><?= implode('<br>', array_map('h', $erreurs)) ?></div><?php endif; ?>
-<?php if (!$depart && $estEmploye): ?>
+<?php if (!$depart && $retour): ?>
+  <div class="flash flash--info">Aucun état des lieux de départ n'a été fait pour cette location.</div>
+  <section class="formulaire"><h2>Retour</h2><?= vue_etat($retour, ['zones' => []]) ?></section>
+<?php elseif (!$depart && $estEmploye && !$l['date_retour_effective']): ?>
   <form class="formulaire" method="post" enctype="multipart/form-data">
     <?= champ_jeton() ?><input type="hidden" name="loc" value="<?= $numLoc ?>">
     <h2>État des lieux de départ</h2>

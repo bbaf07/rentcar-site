@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $idp = (int) $pdo->lastInsertId();
             $pdo->prepare('INSERT INTO client (id_personne, num_permis, date_inscription) VALUES (?, ?, CURDATE())')->execute([$idp, $v['permis']]);
             $num = (int) $pdo->lastInsertId();
+            notifier($pdo, $num, 'Bienvenue chez RentCar', "Votre compte client n° $num est créé. Vous pouvez réserver en ligne ; les prix affichés sont tout compris, la caution est annoncée sur chaque véhicule et l'annulation est gratuite jusqu'à " . DELAI_ANNULATION_GRATUITE_H . ' h avant le départ.');
             $pdo->commit();
         } catch (PDOException $e) {
             $pdo->rollBack();

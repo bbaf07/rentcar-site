@@ -19,11 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $pdo->prepare("UPDATE reservation SET statut = 'CONFIRMEE' WHERE num_reservation = ?")->execute([$num]);
             $pdo->prepare("UPDATE vehicule SET etat = 'RESERVE' WHERE immatriculation = ? AND etat = 'DISPONIBLE'")->execute([$r['immatriculation']]);
+            notifier($pdo, (int) $r['num_client'], "Réservation n° $num confirmée", 'Votre réservation du ' . date_fr($r['date_debut']) . ' au ' . date_fr($r['date_fin']) . " est confirmée par l'agence. Présentez-vous au comptoir le jour du départ avec votre carte bancaire. Annulation gratuite jusqu'à " . DELAI_ANNULATION_GRATUITE_H . ' h avant le départ.');
             flash('ok', "Réservation n° $num confirmée.");
         }
     } elseif ($r && $act === 'annuler' && in_array($r['statut'], ['EN_ATTENTE', 'CONFIRMEE'], true)) {
         $pdo->prepare("UPDATE reservation SET statut = 'ANNULEE' WHERE num_reservation = ?")->execute([$num]);
         liberer_vehicule($pdo, $r['immatriculation']);
+        notifier($pdo, (int) $r['num_client'], "Réservation n° $num annulée par l'agence", 'Votre réservation du ' . date_fr($r['date_debut']) . ' au ' . date_fr($r['date_fin']) . " a été annulée par l'agence, sans frais pour vous.");
         flash('ok', "Réservation n° $num annulée.");
     }
     rediriger('reservations.php' . (isset($_GET['statut']) ? '?statut=' . rawurlencode((string) $_GET['statut']) : ''));

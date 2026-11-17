@@ -61,6 +61,8 @@ entete('Contrat de location n° ' . $numLoc, $estEmploye ? 'UC-06' : null, $estE
 </div>
 <div class="actions no-print">
   <button class="btn" type="button" data-imprimer>Imprimer le contrat</button>
+  <a class="btn btn--secondaire" href="facture.php?loc=<?= $numLoc ?>">Facture</a>
+  <a class="btn btn--secondaire" href="etat-des-lieux.php?loc=<?= $numLoc ?>">États des lieux</a>
   <?php if ($estEmploye): ?><a href="louer.php">Nouvelle location</a><?php else: ?><a href="espace-client.php?onglet=locations">Retour à mon espace</a><?php endif; ?>
 </div>
 <?php pied();

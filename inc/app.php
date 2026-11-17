@@ -28,6 +28,7 @@ function bd(): PDO
         $err = null;
         $pdo = connexion_rentcar($err);
         if (!$pdo) {
+            $GLOBALS['__bd_ko'] = true;
             http_response_code(503);
             entete('Base indisponible', null);
             echo '<div class="alerte"><h2>La base rentcar ne répond pas</h2><p>Démarrez WampServer et attendez que son icône passe au vert, puis rechargez la page.</p><p class="gris">Détail : ' . h($err) . '</p></div>';
@@ -121,7 +122,11 @@ function entete(string $titre, ?string $uc, int $etape = 0, array $ext = [], arr
     <button class="burger" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav id="menu" aria-label="Navigation principale"><ul>
       <?php foreach ($menus as [$lien, $lib]): ?>
-        <li><a href="<?= $lien ?>"<?= $lien === $courant ? ' aria-current="page"' : '' ?>><?= h($lib) ?></a></li>
+        <li><a href="<?= $lien ?>"<?= $lien === $courant ? ' aria-current="page"' : '' ?>><?= h($lib) ?><?php
+          if ($lien === 'espace-client.php' && empty($GLOBALS['__bd_ko'])) {
+              $nb = (int) bd()->query('SELECT COUNT(*) FROM notification WHERE lue = 0 AND num_client = ' . (int) $u['num_client'])->fetchColumn();
+              if ($nb) { echo '<span class="pastille" aria-label="' . $nb . ' notification' . ($nb > 1 ? 's' : '') . ' non lue' . ($nb > 1 ? 's' : '') . '">' . $nb . '</span>'; }
+          } ?></a></li>
       <?php endforeach; ?>
     </ul></nav>
     <div class="acteur">

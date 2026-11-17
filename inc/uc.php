@@ -64,7 +64,7 @@ return [
             "Le système demande une autorisation de paiement au système bancaire.",
             "Le système bancaire accepte la transaction.",
             "Le système crée la location, enregistre le paiement, passe le véhicule à LOUE et clôture la réservation.",
-            "Le système imprime la fiche de location et affiche le contrat avec l'emplacement du véhicule.",
+            "Le système affiche le contrat avec l'emplacement du véhicule ; l'employé réalise l'état des lieux de départ (zones, carburant, photos).",
         ],
         'extensions' => [
             '1a' => "Numéro inconnu : recherche par nom du client, choix d'une réservation. Retour à l'étape 2.",
@@ -81,10 +81,10 @@ return [
         'extend' => ['UC-12'],
         'etapes' => [
             "L'employé choisit la location en cours du véhicule rendu.",
-            "L'employé saisit le kilométrage et le carburant au retour.",
-            "Le système compare avec la date de retour prévue et le carburant au départ.",
-            "Point d'extension « retard, carburant manquant » : si besoin, Facturer un supplément.",
-            "Le système enregistre le retour et remet le véhicule DISPONIBLE à sa place.",
+            "L'employé réalise l'état des lieux du retour : kilométrage, carburant, constat par zone, photos.",
+            "Le système compare avec la date prévue et l'état des lieux de départ (carburant, dommages nouveaux).",
+            "Point d'extension « retard, carburant manquant, dommage » : si besoin, Facturer un supplément.",
+            "Le système enregistre le retour, libère la caution et remet le véhicule DISPONIBLE à sa place.",
         ],
         'extensions' => ['2a' => "Kilométrage inférieur à celui du départ : message, retour à l'étape 2."],
     ],
@@ -126,7 +126,7 @@ return [
     ],
     'UC-12' => [
         'titre' => 'Facturer un supplément', 'acteurs' => ['Employé', 'Système bancaire'], 'page' => 'rendre.php', 'etend' => 'UC-07',
-        'etapes' => ["Le système calcule le supplément : jours de retard × tarif journée, et carburant manquant.", "L'employé encaisse le supplément par carte.", "Le système enregistre un paiement supplémentaire lié à la location."],
+        'etapes' => ["Le système calcule le supplément : jours de retard × tarif journée, carburant manquant et réparation d'un dommage nouveau (plafonnée à la franchise).", "L'employé encaisse le supplément par carte.", "Le système enregistre un paiement supplémentaire lié à la location."],
         'extensions' => [],
     ],
     'UC-13' => [
