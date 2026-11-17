@@ -3,6 +3,7 @@ declare(strict_types=1);
 // Socle de l'application RentCar : session, base, acteur connecté, jeton anti-CSRF, mise en page.
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/metier.php';
+require_once __DIR__ . '/amelioration.php';
 
 session_start([
     'cookie_httponly' => true,
@@ -244,7 +245,7 @@ function badge(string $etat): string
 function libelle_etat(string $e): string
 {
     return ['DISPONIBLE' => 'Disponible', 'RESERVE' => 'Réservé', 'LOUE' => 'Loué', 'EN_MAINTENANCE' => 'En maintenance',
-        'CONFIRMEE' => 'Confirmée', 'EN_ATTENTE' => 'En attente', 'HONOREE' => 'Honorée', 'ANNULEE' => 'Annulée', 'EXPIREE' => 'Expirée'][$e] ?? $e;
+        'CONFIRMEE' => 'Confirmée', 'EN_ATTENTE' => 'En attente', 'HONOREE' => 'Honorée', 'ANNULEE' => 'Annulée', 'EXPIREE' => 'Expirée', 'BLOQUEE' => 'Caution bloquée', 'LIBEREE' => 'Caution libérée', 'RETENUE' => 'Caution retenue'][$e] ?? $e;
 }
 function date_fr(?string $d): string
 {
@@ -263,6 +264,12 @@ function carte_vehicule(array $v, string $action = ''): string
       <div class="vehicule__corps">
         <h3><?= h($v['marque'] . ' ' . $v['modele']) ?></h3>
         <p class="vehicule__meta"><span>Catégorie <?= h($v['code_categorie'] . (!empty($v['categorie_libelle']) ? ', ' . $v['categorie_libelle'] : '')) ?></span><span><?= $v['type'] === 'UTILITAIRE' ? 'Utilitaire' : 'Touristique' ?></span><span><?= h((string) $v['couleur']) ?></span></p>
+        <?php if (isset($v['nb_places'])): ?>
+          <ul class="atouts" aria-label="Caractéristiques">
+            <li><?= (int) $v['nb_places'] ?> places</li><li><?= h(libelle_boite($v['boite'])) ?></li><li><?= h(libelle_energie($v['energie'])) ?></li>
+          </ul>
+        <?php endif; ?>
+        <?php if (isset($v['caution'])): ?><p class="caution-ligne">Caution <?= euros((float) $v['caution']) ?>, bloquée sur la carte et non débitée</p><?php endif; ?>
         <?php if (isset($v['etat'])): ?><?= badge($v['etat']) ?><?php endif; ?>
         <?= $action ?>
       </div>

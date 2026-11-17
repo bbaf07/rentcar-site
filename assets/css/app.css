@@ -258,3 +258,52 @@ input:focus, select:focus { border-color: var(--plaque); outline: none; box-shad
 
 .repere-etape { margin-left: auto; font: 600 .95rem/1 var(--display); color: var(--bitume); background: var(--marquage); padding: 8px 11px 7px; border-radius: 3px; text-decoration: none; white-space: nowrap; }
 @media (min-width: 1001px) { .repere-etape { pointer-events: none; } }
+
+/* ---------- Améliorations issues du benchmark ---------- */
+.atouts { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; }
+.atouts li { font: 600 .85rem/1 var(--display); padding: 6px 8px 5px; border-radius: 3px; background: var(--surface-2); color: var(--texte); }
+.caution-ligne { margin: 0; font-size: .88rem; color: var(--gris); }
+.filtres { margin-top: 16px; border-top: 1px solid var(--ligne); padding-top: 12px; }
+.filtres summary { cursor: pointer; font: 600 1.02rem var(--display); margin-bottom: 12px; }
+.prix-detail { background: var(--surface); border: 2px solid var(--marquage); border-radius: 8px; padding: 18px 20px; margin-bottom: 24px; }
+.prix-detail table { width: 100%; border-collapse: collapse; }
+.prix-detail td { padding: 8px 0; border-bottom: 1px solid var(--ligne); }
+.prix-detail .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prix-detail tr.total td { font: 700 1.3rem var(--display); border-bottom: 0; }
+.prix-detail__sans { color: var(--ok); font-weight: 600; margin: 6px 0 10px; }
+.prix-detail__regles { margin: 0; padding-left: 1.2em; font-size: .94rem; }
+.prix-detail__regles li { margin-bottom: 5px; }
+/* État des lieux */
+.zones { width: 100%; border-collapse: collapse; background: var(--surface); }
+.zones th, .zones td { padding: 9px 10px; border-bottom: 1px solid var(--ligne); text-align: left; vertical-align: middle; }
+.zones th { font: 600 1rem var(--display); background: var(--surface-2); }
+.choix-etat { display: flex; flex-wrap: wrap; gap: 6px; }
+.choix-etat label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border: 2px solid var(--ligne); border-radius: 4px; cursor: pointer; font-size: .9rem; }
+.choix-etat input { width: auto; margin: 0; accent-color: var(--plaque); }
+.choix-etat label:has(input:checked) { border-color: var(--plaque); background: color-mix(in srgb, var(--plaque) 10%, transparent); font-weight: 600; }
+.zones td input[type=text] { padding: 6px 8px; }
+.etat-OK { color: var(--ok); font-weight: 600; } .etat-RAYURE, .etat-CHOC { color: var(--ambre); font-weight: 600; } .etat-CASSE { color: var(--alerte); font-weight: 600; }
+.nouveau-dommage td { background: color-mix(in srgb, var(--alerte) 10%, transparent); }
+.galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 10px 0 0; }
+.galerie a { display: block; border-radius: 6px; overflow: hidden; border: 1px solid var(--ligne); aspect-ratio: 4/3; }
+.galerie img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.etape-suivante { border: 2px solid var(--marquage); border-radius: 8px; padding: 16px 18px; background: var(--surface); margin-bottom: 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.etape-suivante p { margin: 0; }
+/* Espace client */
+.onglets-client { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 22px; border-bottom: 2px solid var(--ligne); }
+.onglets-client a { text-decoration: none; font: 600 1.05rem/1 var(--display); padding: 11px 14px 10px; border-radius: 4px 4px 0 0; color: var(--gris); margin-bottom: -2px; border-bottom: 3px solid transparent; }
+.onglets-client a[aria-current="page"] { color: var(--texte); border-bottom-color: var(--marquage); }
+.pastille { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--alerte); color: #fff; font: 700 .78rem/1 var(--corps); margin-left: 6px; vertical-align: 1px; }
+.notif { background: var(--surface); border: 1px solid var(--ligne); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.notif.non-lue { border-left: 0; box-shadow: inset 4px 0 0 var(--plaque); }
+.notif header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.notif header b { font: 600 1.08rem var(--display); }
+.notif header small { color: var(--gris); }
+.notif p { margin: 0; font-size: .95rem; }
+.location-client { background: var(--surface); border: 1px solid var(--ligne); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; display: grid; grid-template-columns: 160px 1fr auto; gap: 18px; align-items: center; }
+.location-client img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 6px; }
+.location-client h3 { margin: 0 0 4px; }
+.location-client .liens { display: flex; flex-direction: column; gap: 8px; }
+@media (max-width: 760px) { .location-client { grid-template-columns: 1fr; } }
+.caution-etat { display: inline-flex; gap: 6px; align-items: center; font-size: .92rem; }
+.badge--BLOQUEE { color: var(--ambre); } .badge--LIBEREE { color: var(--ok); } .badge--RETENUE { color: var(--alerte); }

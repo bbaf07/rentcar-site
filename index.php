@@ -4,7 +4,7 @@ $pdo = bd();
 $aujourdhui = date('Y-m-d');
 $demain = date('Y-m-d', strtotime('+3 days'));
 $categories = $pdo->query('SELECT * FROM categorie ORDER BY code')->fetchAll();
-$parc = $pdo->query("SELECT v.*, c.libelle AS categorie_libelle FROM vehicule v JOIN categorie c ON c.code = v.code_categorie ORDER BY v.code_categorie, v.marque")->fetchAll();
+$parc = $pdo->query("SELECT v.*, c.libelle AS categorie_libelle, c.caution, c.franchise FROM vehicule v JOIN categorie c ON c.code = v.code_categorie ORDER BY v.code_categorie, v.marque")->fetchAll();
 $prixMin = $pdo->query("SELECT t.code_categorie, MIN(t.prix) FROM tarif t WHERE t.code_formule = 'JOUR' GROUP BY t.code_categorie")->fetchAll(PDO::FETCH_KEY_PAIR);
 $c = cas();
 

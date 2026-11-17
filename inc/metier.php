@@ -51,9 +51,15 @@ function montant_reservation(PDO $pdo, string $cat, string $formule, string $deb
 }
 
 // ---------- Disponibilité (UC-01, UC-05) ----------
-function vehicules_disponibles(PDO $pdo, ?string $cat, string $debut, string $fin, ?string $immat = null): array
+/**
+ * Véhicules libres sur toute la période. $f (filtres de recherche, facultatifs) :
+ * type, energie, boite, places (minimum), prixmax (tarif journée maximum).
+ */
+function vehicules_disponibles(PDO $pdo, ?string $cat, string $debut, string $fin, ?string $immat = null, array $f = []): array
 {
-    $sql = "SELECT v.*, c.libelle AS categorie_libelle FROM vehicule v JOIN categorie c ON c.code = v.code_categorie
+    $sql = "SELECT v.*, c.libelle AS categorie_libelle, c.caution, c.franchise,
+                   (SELECT prix FROM tarif t WHERE t.code_categorie = v.code_categorie AND t.code_formule = 'JOUR') AS prix_jour
+            FROM vehicule v JOIN categorie c ON c.code = v.code_categorie
             WHERE v.etat <> 'EN_MAINTENANCE'
               AND NOT EXISTS (SELECT 1 FROM reservation r WHERE r.immatriculation = v.immatriculation
                               AND r.statut IN ('EN_ATTENTE','CONFIRMEE') AND r.date_debut <= :fin AND r.date_fin >= :debut)
@@ -62,7 +68,15 @@ function vehicules_disponibles(PDO $pdo, ?string $cat, string $debut, string $fi
     $p = [':debut' => $debut, ':fin' => $fin];
     if ($cat) { $sql .= ' AND v.code_categorie = :cat'; $p[':cat'] = $cat; }
     if ($immat) { $sql .= ' AND v.immatriculation = :immat'; $p[':immat'] = $immat; }
-    $st = $pdo->prepare($sql . ' ORDER BY v.code_categorie, v.marque');
+    if (!empty($f['type'])) { $sql .= ' AND v.type = :type'; $p[':type'] = $f['type']; }
+    if (!empty($f['energie'])) { $sql .= ' AND v.energie = :energie'; $p[':energie'] = $f['energie']; }
+    if (!empty($f['boite'])) { $sql .= ' AND v.boite = :boite'; $p[':boite'] = $f['boite']; }
+    if (!empty($f['places'])) { $sql .= ' AND v.nb_places >= :places'; $p[':places'] = (int) $f['places']; }
+    if (!empty($f['prixmax'])) {
+        $sql .= " AND (SELECT prix FROM tarif t2 WHERE t2.code_categorie = v.code_categorie AND t2.code_formule = 'JOUR') <= :prixmax";
+        $p[':prixmax'] = (float) $f['prixmax'];
+    }
+    $st = $pdo->prepare($sql . ' ORDER BY prix_jour, v.code_categorie, v.marque');
     $st->execute($p);
     return $st->fetchAll();
 }

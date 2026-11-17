@@ -6,7 +6,7 @@ if (!$u) { exiger('client'); }
 $estEmploye = $u['role'] === 'employe';
 $aujourdhui = date('Y-m-d');
 
-$vehicules = $pdo->query("SELECT v.*, c.libelle AS categorie_libelle FROM vehicule v JOIN categorie c ON c.code = v.code_categorie WHERE v.etat <> 'EN_MAINTENANCE' ORDER BY v.code_categorie, v.marque")->fetchAll();
+$vehicules = $pdo->query("SELECT v.*, c.libelle AS categorie_libelle, c.caution, c.franchise FROM vehicule v JOIN categorie c ON c.code = v.code_categorie WHERE v.etat <> 'EN_MAINTENANCE' ORDER BY v.code_categorie, v.marque")->fetchAll();
 $formules = $pdo->query('SELECT * FROM formule ORDER BY duree_jours')->fetchAll();
 $clients = $estEmploye ? $pdo->query('SELECT c.num_client, p.nom, p.prenom FROM client c JOIN personne p ON p.id_personne = c.id_personne ORDER BY p.nom')->fetchAll() : [];
 
@@ -47,6 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($estEmploye) {
                         $pdo->prepare("UPDATE vehicule SET etat = 'RESERVE' WHERE immatriculation = ? AND etat = 'DISPONIBLE'")->execute([$choix['immat']]);
                     }
+                    notifier($pdo, $choix['client'], "Réservation n° $creee " . ($estEmploye ? 'confirmée' : 'reçue'),
+                        "{$vehicule['marque']} {$vehicule['modele']} du " . date_fr($choix['debut']) . ' au ' . date_fr($choix['fin'])
+                        . ", formule {$recap['formule']}, total " . euros($recap['montant']) . ', caution ' . euros((float) $vehicule['caution']) . ' (non débitée). '
+                        . ($estEmploye ? 'Votre réservation est confirmée par l\'agence.' : 'L\'agence va la confirmer ; vous serez prévenu ici.')
+                        . ' Annulation gratuite jusqu\'à ' . DELAI_ANNULATION_GRATUITE_H . ' h avant le départ.');
                     $pdo->commit();
                     $etape = 6;
                 }
@@ -69,10 +74,10 @@ entete('Réserver un véhicule', 'UC-05', $etape, $ext);
       <dt>Véhicule</dt><dd><?= h($vehicule['marque'] . ' ' . $vehicule['modele']) ?> <?= plaque($vehicule['immatriculation']) ?></dd>
       <dt>Période</dt><dd>du <?= date_fr($choix['debut']) ?> au <?= date_fr($choix['fin']) ?></dd>
       <dt>Formule</dt><dd><?= h($recap['formule']) ?></dd>
-      <div class="total"><span>Montant prévisionnel</span><b><?= euros($recap['montant']) ?></b></div>
+      <div class="total"><span>Total à payer au retrait</span><b><?= euros($recap['montant']) ?></b></div>
     </dl>
   </div>
-  <p class="gris">Le jour du retrait, présentez-vous au comptoir avec votre carte bancaire : l'employé transformera cette réservation en location (cas UC-06).</p>
+  <p class="gris">Le jour du retrait, présentez-vous au comptoir avec votre carte bancaire : l'employé réalise l'état des lieux de départ avec vous, puis bloque la caution de <?= euros((float) $vehicule['caution']) ?> (non débitée). Une confirmation vous attend dans votre espace client.</p>
   <div class="actions"><a class="btn" href="<?= $estEmploye ? 'reservations.php' : 'espace-client.php' ?>"><?= $estEmploye ? 'Voir les réservations' : 'Voir mes réservations' ?></a><a class="btn btn--secondaire" href="reserver.php">Nouvelle réservation</a></div>
 
 <?php elseif ($recap && $etape === 4): ?>
@@ -88,9 +93,10 @@ entete('Réserver un véhicule', 'UC-05', $etape, $ext);
       <dt>Catégorie</dt><dd><?= h($vehicule['code_categorie'] . ', ' . $vehicule['categorie_libelle']) ?></dd>
       <dt>Période</dt><dd>du <?= date_fr($choix['debut']) ?> au <?= date_fr($choix['fin']) ?> (<?= $recap['jours'] ?> jour<?= $recap['jours'] > 1 ? 's' : '' ?>)</dd>
       <dt>Formule</dt><dd><?= h($recap['formule']) ?> : <?= $recap['nb'] ?> × <?= euros($recap['prix']) ?></dd>
-      <div class="total"><span>Montant prévisionnel</span><b><?= euros($recap['montant']) ?></b></div>
+      <div class="total"><span>Total à payer au retrait</span><b><?= euros($recap['montant']) ?></b></div>
     </dl>
   </div>
+  <?= bloc_prix($recap, (float) $vehicule['caution'], (float) $vehicule['franchise'], $choix['debut']) ?>
   <form method="post" class="actions">
     <?= champ_jeton() ?>
     <?php foreach ($choix as $k => $val): ?><input type="hidden" name="<?= $k ?>" value="<?= h((string) $val) ?>"><?php endforeach; ?>
