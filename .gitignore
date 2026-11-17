@@ -1,0 +1,8 @@
+# Photos des états des lieux envoyées par les employés (données, pas du code)
+uploads/
+# Fichiers système et éditeurs
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
+*.log
