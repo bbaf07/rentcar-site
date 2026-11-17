@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/metier.php';
 require_once __DIR__ . '/amelioration.php';
+require_once __DIR__ . '/vues_etat.php';
 
 session_start([
     'cookie_httponly' => true,

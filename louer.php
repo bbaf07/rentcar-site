@@ -10,7 +10,7 @@ const TENTATIVES_MAX = 3;
 function charger_reservation(PDO $pdo, int $num): ?array
 {
     $st = $pdo->prepare("SELECT r.*, v.marque, v.modele, v.couleur, v.type, v.code_categorie, v.nb_kms, v.qte_carburant, v.etat, v.num_emplacement,
-                                c.libelle AS categorie_libelle, e.zone, p.nom, p.prenom, p.adresse, p.telephone, cl.num_permis, f.libelle AS formule_libelle
+                                c.libelle AS categorie_libelle, c.caution, c.franchise, e.zone, p.nom, p.prenom, p.adresse, p.telephone, cl.num_permis, f.libelle AS formule_libelle
                          FROM reservation r JOIN vehicule v ON v.immatriculation = r.immatriculation
                          JOIN categorie c ON c.code = v.code_categorie LEFT JOIN emplacement e ON e.numero = v.num_emplacement
                          JOIN client cl ON cl.num_client = r.num_client JOIN personne p ON p.id_personne = cl.id_personne
@@ -28,35 +28,9 @@ $etat = $_SESSION['louer'] ?? null;     // ['num' => …, 'formule' => …, 'ten
 $action = $_SERVER['REQUEST_METHOD'] === 'POST' ? post('action') : '';
 if ($action) { verifier_jeton(); }
 
-// Contrat d'une location qui vient d'être enregistrée (étape 10, après redirection)
+// Ancien lien vers le contrat : le contrat a maintenant sa propre page, consultable aussi par le client
 if (isset($_GET['contrat'])) {
-    $st = $pdo->prepare('SELECT l.*, pa.num_transaction, pa.montant AS paye, cb.numero_masque, cb.titulaire FROM location l
-                         LEFT JOIN paiement pa ON pa.num_location = l.num_location LEFT JOIN carte_bancaire cb ON cb.id_carte = pa.id_carte
-                         WHERE l.num_location = ? ORDER BY pa.date_paiement LIMIT 1');
-    $st->execute([(int) $_GET['contrat']]);
-    $loc = $st->fetch();
-    if ($loc) {
-        $r = charger_reservation($pdo, (int) $loc['num_reservation']);
-        entete('Contrat de location n° ' . $loc['num_location'], 'UC-06', 11);
-        [$photo] = photo_vehicule($r); ?>
-        <div class="flash flash--ok no-print" role="status">Paiement autorisé, location enregistrée : le véhicule est loué et la réservation est honorée.</div>
-        <div class="contrat">
-          <div class="entete-doc"><div><h2 style="margin:0">RentCar, contrat de location</h2>Location n° <?= (int) $loc['num_location'] ?>, réservation n° <?= (int) $r['num_reservation'] ?></div><div style="text-align:right">Établi le <?= date_fr($loc['date_location']) ?><br>par <?= h($u['prenom'] . ' ' . $u['nom']) ?> (<?= h((string) $u['matricule']) ?>)</div></div>
-          <table>
-            <tr><th>Client</th><td><?= h($r['prenom'] . ' ' . $r['nom']) ?>, permis <?= h($r['num_permis']) ?><br><?= h((string) $r['adresse']) ?></td></tr>
-            <tr><th>Véhicule</th><td><?= h($r['marque'] . ' ' . $r['modele']) ?>, <?= h($r['immatriculation']) ?>, catégorie <?= h($r['code_categorie']) ?></td></tr>
-            <tr><th>Période</th><td>du <?= date_fr($loc['date_location']) ?> au <?= date_fr($loc['date_retour_prevue']) ?> (retour prévu)</td></tr>
-            <tr><th>Formule</th><td><?= h($r['formule_libelle']) ?></td></tr>
-            <tr><th>Compteur au départ</th><td><?= number_format((int) $loc['km_depart'], 0, ',', ' ') ?> km, carburant <?= number_format((float) $r['qte_carburant'], 0, ',', ' ') ?> L</td></tr>
-            <tr><th>Paiement</th><td><?= euros((float) $loc['montant_paye']) ?>, carte <?= h((string) $loc['numero_masque']) ?>, transaction <?= h((string) $loc['num_transaction']) ?></td></tr>
-          </table>
-          <div class="emplacement-final">Le véhicule vous attend à l'emplacement <span><?= h((string) $r['num_emplacement']) ?><?= $r['zone'] ? ', ' . h($r['zone']) : '' ?></span></div>
-          <p style="font-size:.9rem">Tout retour après la date prévue ou avec un réservoir incomplet donne lieu à un supplément (cas « Facturer un supplément »).</p>
-        </div>
-        <div class="actions"><button class="btn" type="button" data-imprimer>Imprimer la fiche de location</button><a class="btn btn--secondaire" href="louer.php">Nouvelle location</a></div>
-        <?php pied();
-        exit;
-    }
+    rediriger('contrat.php?loc=' . (int) $_GET['contrat']);
 }
 
 if ($action === 'annuler') {
@@ -129,7 +103,7 @@ if ($action === 'payer' && $etat) {
         $etape = 8;
         if ($etat['tentatives'] < TENTATIVES_MAX) {
             $ext[] = '8a'; $etape = 6;
-            $message = (carte_valide($numero, $mois, $aujourdhui) ? 'Paiement refusé par la banque.' : 'Carte invalide ou expirée.') . ' Demandez une autre carte au client (tentative ' . $etat['tentatives'] . ' sur ' . TENTATIVES_MAX . ').';
+            $message = explication_paiement($numero, $mois, $aujourdhui, $reponse) . ' Tentative ' . $etat['tentatives'] . ' sur ' . TENTATIVES_MAX . '.';
         } else {
             $ext[] = '8b'; $echec = true;
             $message = 'Paiement refusé ' . TENTATIVES_MAX . ' fois : la location est abandonnée, la réservation est conservée.';
@@ -139,8 +113,9 @@ if ($action === 'payer' && $etat) {
         // Étape 9 : toutes les écritures dans une seule transaction (tout ou rien)
         $pdo->beginTransaction();
         try {
-            $pdo->prepare('INSERT INTO location (num_reservation, date_location, date_retour_prevue, km_depart, montant_paye) VALUES (?, ?, ?, ?, ?)')
-                ->execute([$r['num_reservation'], $aujourdhui, $r['date_fin'], $r['nb_kms'], $m['montant']]);
+            // La caution est une empreinte bancaire : enregistrée comme bloquée, jamais débitée ici
+            $pdo->prepare("INSERT INTO location (num_reservation, date_location, date_retour_prevue, km_depart, montant_paye, caution, statut_caution) VALUES (?, ?, ?, ?, ?, ?, 'BLOQUEE')")
+                ->execute([$r['num_reservation'], $aujourdhui, $r['date_fin'], $r['nb_kms'], $m['montant'], $r['caution']]);
             $numLoc = (int) $pdo->lastInsertId();
             $pdo->prepare('INSERT INTO carte_bancaire (num_client, numero_masque, titulaire, date_expiration) VALUES (?, ?, ?, ?)')
                 ->execute([$r['num_client'], masquer($numero), $titulaire ?: $r['prenom'] . ' ' . $r['nom'], fin_validite($mois)]);
@@ -149,13 +124,17 @@ if ($action === 'payer' && $etat) {
                 ->execute(['TX-' . strtoupper(bin2hex(random_bytes(6))), $aujourdhui, $m['montant'], $numLoc, $idCarte]);
             $pdo->prepare("UPDATE vehicule SET etat = 'LOUE' WHERE immatriculation = ?")->execute([$r['immatriculation']]);
             $pdo->prepare("UPDATE reservation SET statut = 'HONOREE', code_formule = ? WHERE num_reservation = ?")->execute([$etat['formule'], $r['num_reservation']]);
+            notifier($pdo, (int) $r['num_client'], "Contrat de location n° $numLoc",
+                "Paiement de " . euros($m['montant']) . " accepté (carte " . masquer($numero) . "). {$r['marque']} {$r['modele']} à rendre le " . date_fr($r['date_fin'])
+                . '. Caution de ' . euros((float) $r['caution']) . ' bloquée, non débitée. Votre contrat et l\'état des lieux de départ sont dans votre espace client.');
             $pdo->commit();
         } catch (Throwable $e) {
             $pdo->rollBack();
             throw $e;
         }
         abandonner();
-        rediriger('louer.php?contrat=' . $numLoc);
+        flash('ok', 'Paiement autorisé, location enregistrée : le véhicule est loué et la réservation est honorée.');
+        rediriger('contrat.php?loc=' . $numLoc);
     }
     if ($etat) { $etape = max($etape, 6); }
 }
@@ -188,6 +167,7 @@ entete('Louer un véhicule', 'UC-06', $etape, $ext);
       <div class="total"><span>Montant à payer</span><b><?= euros($m['montant']) ?></b></div>
     </dl>
   </div>
+  <?= bloc_prix($m, (float) $r['caution'], (float) $r['franchise']) ?>
   <form method="post" class="formulaire">
     <?= champ_jeton() ?>
     <h3>5a. Le client change de formule</h3>
