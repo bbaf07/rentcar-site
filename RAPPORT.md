@@ -2,7 +2,7 @@
 
 **Auteurs** : NGONGANG NOUDJI Fournier, WABO MBA Miguel Jovan, MPACKO DISSAKE Allegra Anaelle, BOYEKON BAFALAK Alane Bryan (ECE Mastères, groupe du TP 2)
 **Date** : 17/11/2026
-**Dépôt** : à créer sur GitHub
+**Dépôt** : https://github.com/bbaf07/rentcar-site
 **Site** : local, servi par WampServer à l'adresse `http://localhost/rentcar/`
 
 ## Résumé
