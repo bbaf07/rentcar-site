@@ -169,7 +169,7 @@ Les scénarios ont été joués de bout en bout dans le navigateur, puis rejoué
 ## 9. Déploiement et utilisation
 
 1. Installer WampServer (PHP 8.3, MySQL 8.4).
-2. Exécuter dans l'ordre `RentCar-Java/src/main/resources/sql/schema.sql`, puis `donnees_test.sql`, puis `RentCar-Java/sql/evolution_site.sql`, puis `donnees_site.sql`. Le script `reinitialiser_demo.sql` remet la démonstration à zéro ; lancez `mysql` avec `--default-character-set=utf8mb4` pour garder les accents.
+2. Exécuter dans l'ordre `src/main/resources/sql/schema.sql`, puis `donnees_test.sql`, puis `RentCar-Java/sql/evolution_site.sql`, puis `donnees_site.sql`. Le script `reinitialiser_demo.sql` remet la démonstration à zéro ; lancez `mysql` avec `--default-character-set=utf8mb4` pour garder les accents.
 3. Rendre le dossier `Site/` accessible sous `C:\wamp64\www\rentcar`, par exemple avec une jonction : `mklink /J C:\wamp64\www\rentcar <chemin>\Site`.
 4. Renseigner les identifiants MySQL dans `RentCar-Java/src/main/resources/db.properties`. Ce fichier est situé hors du dossier web et n'est pas versionné avec le site.
 5. Ouvrir `http://localhost/rentcar/`.

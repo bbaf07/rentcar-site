@@ -28,7 +28,7 @@ Sécurité :
 ## Installation
 
 1. Installer WampServer.
-2. Créer la base : exécuter `RentCar-Java/src/main/resources/sql/schema.sql` et `donnees_test.sql`, puis `RentCar-Java/sql/evolution_site.sql` et `donnees_site.sql`. Pour revenir à l'état de démonstration, lancer depuis `RentCar-Java/sql/` :
+2. Récupérer le projet Java [rentcar-java](https://github.com/bbaf07/rentcar-java) (schéma, données, `db.properties`) et le placer à côté de `Site/`. Créer la base : exécuter `RentCar-Java/src/main/resources/sql/schema.sql` et `donnees_test.sql`, puis `RentCar-Java/sql/evolution_site.sql` et `donnees_site.sql`. Pour revenir à l'état de démonstration, lancer depuis `RentCar-Java/sql/` :
 
    ```bash
    mysql --default-character-set=utf8mb4 -h 127.0.0.1 -u root < reinitialiser_demo.sql
