@@ -2,7 +2,7 @@
 
 **Auteurs** : NGONGANG NOUDJI Fournier, WABO MBA Miguel Jovan, MPACKO DISSAKE Allegra Anaelle, BOYEKON BAFALAK Alane Bryan (ECE Mastères, groupe du TP 2)
 **Date** : 17/11/2026
-**Dépôt** : https://github.com/bbaf07/rentcar-site
+**Dépôts** : https://github.com/bbaf07/rentcar-site (site) et https://github.com/bbaf07/rentcar-java (projet Java et scripts SQL)
 **Site** : local, servi par WampServer à l'adresse `http://localhost/rentcar/`
 
 ## Résumé
@@ -183,6 +183,7 @@ Les comptes de démonstration sont listés dans le README.
 - Les modèles 3D sont génériques, un par silhouette, et non le modèle exact de chaque véhicule.
 - La logique métier existe en double, en PHP et en Java. L'API Spring Boot `autoloc-api` (workshops UP ASI) montre la voie d'un service unique.
 - Il n'y a pas de tests automatisés PHP. PHPUnit serait la prochaine étape.
+- Les nouvelles classes (états des lieux, notifications) ne figurent pas encore dans les diagrammes UML du TP 2.
 
 ## Annexes
 
